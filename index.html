@@ -509,7 +509,91 @@ if (records.length > 0) {
   showAnalysis(latest, previous);
   showWorldComparison(latest);
 }
+function drawGraph() {
+  const event = document.getElementById("graphEvent").value;
+  const canvas = document.getElementById("recordChart");
+  const ctx = canvas.getContext("2d");
 
+  const data = records.filter(r => r.event === event);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (data.length === 0) {
+    ctx.font = "16px Arial";
+    ctx.fillText("まだ記録がありません", 20, 40);
+    return;
+  }
+
+  const width = canvas.width;
+  const height = canvas.height;
+
+  const padding = 40;
+
+  const times = data.map(r => r.time);
+
+  const minTime = Math.min(...times);
+  const maxTime = Math.max(...times);
+
+  const range =
+    maxTime - minTime === 0
+      ? 1
+      : maxTime - minTime;
+
+  ctx.beginPath();
+
+  data.forEach((r, i) => {
+
+    const x =
+      padding +
+      (i / Math.max(data.length - 1, 1)) *
+      (width - padding * 2);
+
+    const y =
+      height -
+      padding -
+      ((r.time - minTime) / range) *
+      (height - padding * 2);
+
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+
+  });
+
+  ctx.stroke();
+
+  data.forEach((r, i) => {
+
+    const x =
+      padding +
+      (i / Math.max(data.length - 1, 1)) *
+      (width - padding * 2);
+
+    const y =
+      height -
+      padding -
+      ((r.time - minTime) / range) *
+      (height - padding * 2);
+
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.font = "12px Arial";
+    ctx.fillText(
+      r.time.toFixed(2),
+      x - 12,
+      y - 10
+    );
+
+  });
+
+  ctx.font = "12px Arial";
+  ctx.fillText("← 過去", 10, height - 10);
+  ctx.fillText("最新 →", width - 55, height - 10);
+}drawGraph();
 </script>
 <div class="card">
   <h2>📈 タイム推移</h2>
