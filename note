@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speedstars</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #111;
+    }
+
+    header {
+      background: #111;
+      color: white;
+      padding: 25px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 36px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      color: #ccc;
+    }
+
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 25px;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      margin-top: 0;
+    }
+
+    button {
+      background: #111;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>🏃 SPEEDSTARS</h1>
+    <p>研究・トレーニング・記録管理</p>
+  </header>
+
+  <main>
+
+    <div class="card">
+      <h2>⏱️ 自己ベスト</h2>
+      <p>100m：--.-- 秒</p>
+      <p>50m：--.-- 秒</p>
+    </div>
+
+    <div class="card">
+      <h2>🏋️ トレーニング</h2>
+      <p>今日のトレーニングをチェックしよう。</p>
+      <button>トレーニングを見る</button>
+    </div>
+
+    <div class="card">
+      <h2>🧠 スプリント研究</h2>
+      <p>スタート、加速、最高速度などを研究。</p>
+      <button>研究を見る</button>
+    </div>
+
+  </main>
+
+</body>
+</html>
