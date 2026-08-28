@@ -6,17 +6,21 @@
 <title>SPEED STARS RECORD</title>
 
 <style>
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #111;
+  background: #0b0b0f;
   color: white;
 }
 
 header {
-  padding: 25px 20px;
   text-align: center;
-  background: #1d1d1d;
+  padding: 30px 20px;
+  background: #15151c;
 }
 
 h1 {
@@ -30,29 +34,33 @@ h1 {
 }
 
 .container {
-  max-width: 600px;
+  max-width: 650px;
   margin: auto;
   padding: 20px;
 }
 
 .card {
-  background: #1d1d1d;
-  border-radius: 16px;
+  background: #17171f;
+  border-radius: 18px;
   padding: 20px;
   margin-bottom: 20px;
+}
+
+h2 {
+  margin-top: 0;
 }
 
 label {
   display: block;
   margin-top: 15px;
   margin-bottom: 6px;
+  color: #ccc;
 }
 
 select,
 input,
 button {
   width: 100%;
-  box-sizing: border-box;
   padding: 13px;
   border-radius: 10px;
   border: none;
@@ -61,21 +69,47 @@ button {
 
 button {
   margin-top: 20px;
+  font-weight: bold;
   background: white;
   color: black;
-  font-weight: bold;
-  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.85;
+}
+
+.result {
+  background: #22222c;
+  padding: 15px;
+  border-radius: 12px;
+  margin-top: 15px;
 }
 
 .record {
-  border-top: 1px solid #444;
-  margin-top: 15px;
-  padding-top: 15px;
+  border-top: 1px solid #333;
+  padding: 15px 0;
+}
+
+.record:first-child {
+  border-top: none;
 }
 
 .best {
-  font-size: 24px;
+  font-size: 25px;
   font-weight: bold;
+}
+
+.good {
+  margin-top: 8px;
+}
+
+.warning {
+  margin-top: 8px;
+}
+
+.small {
+  color: #aaa;
+  font-size: 13px;
 }
 </style>
 </head>
@@ -89,6 +123,7 @@ button {
 
 <div class="container">
 
+  <!-- 記録入力 -->
   <div class="card">
     <h2>🏃 記録を入力</h2>
 
@@ -115,43 +150,107 @@ button {
     <label>最高速度（km/h）</label>
     <input id="speed" type="number" step="0.1" placeholder="例：32.5">
 
-    <button onclick="saveRecord()">記録を保存</button>
+    <button onclick="saveRecord()">💾 記録を保存</button>
   </div>
 
+  <!-- AI分析 -->
+  <div class="card">
+    <h2>🤖 AI分析</h2>
+    <div id="analysis">
+      記録を入力すると分析します。
+    </div>
+  </div>
+
+  <!-- 世界記録比較 -->
+  <div class="card">
+    <h2>🌎 世界記録との差</h2>
+    <div id="worldComparison">
+      まだ記録がありません。
+    </div>
+  </div>
+
+  <!-- 自己ベスト -->
   <div class="card">
     <h2>🏆 自己ベスト</h2>
-    <div id="analysis"></div>
-    <div id="best">まだ記録がありません</div>
+    <div id="best">
+      まだ記録がありません。
+    </div>
   </div>
 
+  <!-- 履歴 -->
   <div class="card">
     <h2>📊 記録履歴</h2>
-    <div id="records">まだ記録がありません</div>
+    <div id="records">
+      まだ記録がありません。
+    </div>
   </div>
 
 </div>
 
 <script>
 
-let records = JSON.parse(localStorage.getItem("speedstarsRecords")) || [];
+/* =========================
+   世界記録
+========================= */
+
+const worldRecords = {
+  "40yd": 3.82,
+  "60m": 5.88,
+  "60H": 5.94,
+  "100m": 8.75,
+  "110H": 9.88,
+  "150m": 12.29,
+  "200m": 16.64,
+  "300m": 25.50,
+  "400H": 37.57,
+  "4×100m": 30.00
+};
+
+
+/* =========================
+   保存データ
+========================= */
+
+let records =
+  JSON.parse(localStorage.getItem("speedstarsRecords")) || [];
+
+
+/* =========================
+   記録保存
+========================= */
 
 function saveRecord() {
 
-  const event = document.getElementById("event").value;
-  const time = parseFloat(document.getElementById("time").value);
-  const stride = parseFloat(document.getElementById("stride").value);
-  const speed = parseFloat(document.getElementById("speed").value);
+  const event =
+    document.getElementById("event").value;
 
-  if (!time) {
+  const time =
+    parseFloat(document.getElementById("time").value);
+
+  const stride =
+    parseFloat(document.getElementById("stride").value) || 0;
+
+  const speed =
+    parseFloat(document.getElementById("speed").value) || 0;
+
+  if (!time || time <= 0) {
     alert("タイムを入力してください！");
     return;
   }
 
+  const previousRecords =
+    records.filter(r => r.event === event);
+
+  const previous =
+    previousRecords.length > 0
+      ? previousRecords[previousRecords.length - 1]
+      : null;
+
   const record = {
     event: event,
     time: time,
-    stride: stride || 0,
-    speed: speed || 0,
+    stride: stride,
+    speed: speed,
     date: new Date().toLocaleDateString("ja-JP")
   };
 
@@ -166,87 +265,232 @@ function saveRecord() {
   document.getElementById("stride").value = "";
   document.getElementById("speed").value = "";
 
+  showBest();
   showRecords();
+  showAnalysis(record, previous);
+  showWorldComparison(record);
 }
 
-function showRecords() {
 
-  const recordsArea = document.getElementById("records");
-  const bestArea = document.getElementById("best");
+/* =========================
+   AI分析
+========================= */
 
-  if (records.length === 0) {
-    recordsArea.innerHTML = "まだ記録がありません";
-    bestArea.innerHTML = "まだ記録がありません";
+function showAnalysis(record, previous) {
+
+  let html = "";
+
+  html += "<div class='result'>";
+
+  html += "<strong>🤖 自動分析</strong>";
+
+  if (record.speed >= 30) {
+    html += "<div class='good'>💨 最高速度は高めです。スピード能力が強みです。</div>";
+  } else if (record.speed > 0) {
+    html += "<div class='warning'>💨 最高速度をさらに伸ばせる余地があります。</div>";
+  }
+
+  if (record.stride >= 2) {
+    html += "<div class='good'>👣 歩幅をしっかり活かせています。</div>";
+  } else if (record.stride > 0) {
+    html += "<div class='warning'>👣 歩幅を安定させることがポイントです。</div>";
+  }
+
+  if (previous) {
+
+    const difference =
+      previous.time - record.time;
+
+    if (difference > 0) {
+
+      html +=
+        "<div class='good'>🔥 前回より " +
+        difference.toFixed(2) +
+        "秒更新しました！</div>";
+
+    } else if (difference < 0) {
+
+      html +=
+        "<div class='warning'>📈 前回より " +
+        Math.abs(difference).toFixed(2) +
+        "秒遅くなっています。フォームやコンディションを確認してみましょう。</div>";
+
+    } else {
+
+      html +=
+        "<div>➡️ 前回と同じタイムです。</div>";
+    }
+
+  } else {
+
+    html +=
+      "<div>🆕 この種目の最初の記録です！</div>";
+  }
+
+  html += "</div>";
+
+  document.getElementById("analysis").innerHTML = html;
+}
+
+
+/* =========================
+   世界記録比較
+========================= */
+
+function showWorldComparison(record) {
+
+  const world =
+    worldRecords[record.event];
+
+  if (!world) {
     return;
   }
 
-  recordsArea.innerHTML = "";
+  const difference =
+    record.time - world;
 
-  records.slice().reverse().forEach(r => {
+  let html = "";
 
-    recordsArea.innerHTML += `
-      <div class="record">
-        <strong>${r.event}</strong><br>
-        ⏱️ ${r.time.toFixed(2)} 秒<br>
-        👣 歩幅：${r.stride.toFixed(2)} m<br>
-        💨 最高速度：${r.speed.toFixed(1)} km/h<br>
-        📅 ${r.date}
-      </div>
-    `;
+  html += "<div class='result'>";
 
-  });
+  html +=
+    "🌎 世界記録：<strong>" +
+    world.toFixed(2) +
+    "秒</strong><br><br>";
+
+  html +=
+    "🏃 あなたの記録：<strong>" +
+    record.time.toFixed(2) +
+    "秒</strong><br><br>";
+
+  html +=
+    "⏱️ 世界記録との差：<strong>" +
+    difference.toFixed(2) +
+    "秒</strong>";
+
+  html += "</div>";
+
+  document.getElementById("worldComparison").innerHTML = html;
+}
+
+
+/* =========================
+   自己ベスト
+========================= */
+
+function showBest() {
+
+  const bestArea =
+    document.getElementById("best");
+
+  if (records.length === 0) {
+    bestArea.innerHTML =
+      "まだ記録がありません";
+    return;
+  }
 
   const bests = {};
 
-  records.forEach(r => {
+  records.forEach(record => {
 
-    if (!bests[r.event] || r.time < bests[r.event].time) {
-      bests[r.event] = r;
+    if (
+      !bests[record.event] ||
+      record.time < bests[record.event].time
+    ) {
+      bests[record.event] = record;
     }
 
   });
 
-  bestArea.innerHTML = "";
+  let html = "";
 
-  Object.values(bests).forEach(r => {
+  Object.values(bests).forEach(record => {
 
-    bestArea.innerHTML += `
+    html += `
       <div class="record">
-        🥇 ${r.event}　
-        <span class="best">${r.time.toFixed(2)}秒</span>
+        🥇 ${record.event}
+        <span class="best">
+          ${record.time.toFixed(2)}秒
+        </span>
       </div>
     `;
 
   });
+
+  bestArea.innerHTML = html;
 }
 
+
+/* =========================
+   履歴
+========================= */
+
+function showRecords() {
+
+  const area =
+    document.getElementById("records");
+
+  if (records.length === 0) {
+    area.innerHTML =
+      "まだ記録がありません";
+    return;
+  }
+
+  let html = "";
+
+  records.slice().reverse().forEach(record => {
+
+    html += `
+      <div class="record">
+
+        <strong>${record.event}</strong><br>
+
+        ⏱️ ${record.time.toFixed(2)}秒<br>
+
+        👣 歩幅：
+        ${record.stride.toFixed(2)}m<br>
+
+        💨 最高速度：
+        ${record.speed.toFixed(1)}km/h<br>
+
+        📅 ${record.date}
+
+      </div>
+    `;
+
+  });
+
+  area.innerHTML = html;
+}
+
+
+/* =========================
+   起動時表示
+========================= */
+
+showBest();
 showRecords();
+
 if (records.length > 0) {
-  const latest = records[records.length - 1];
-  document.getElementById("analysis").innerHTML =
-    "<h3>🤖 AI分析</h3>" + analyzeRecord(latest);
+
+  const latest =
+    records[records.length - 1];
+
+  const sameEvent =
+    records.filter(
+      r => r.event === latest.event
+    );
+
+  const previous =
+    sameEvent.length > 1
+      ? sameEvent[sameEvent.length - 2]
+      : null;
+
+  showAnalysis(latest, previous);
+  showWorldComparison(latest);
 }
 
 </script>
-function analyzeRecord(record) {
-  let message = "";
-
-  if (record.speed >= 30) {
-    message += "💨 最高速度が高く、スピード能力が良いです。<br>";
-  } else {
-    message += "💨 最高速度をさらに伸ばせる可能性があります。<br>";
-  }
-
-  if (record.stride >= 2) {
-    message += "👣 歩幅を活かした走りができています。<br>";
-  } else {
-    message += "👣 歩幅を安定させることが改善ポイントです。<br>";
-  }
-
-  message += "📈 次の目標は自己ベスト更新です！";
-
-  return message;
-}
 
 </body>
 </html>
