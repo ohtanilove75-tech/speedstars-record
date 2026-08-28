@@ -120,6 +120,7 @@ button {
 
   <div class="card">
     <h2>🏆 自己ベスト</h2>
+    <div id="analysis"></div>
     <div id="best">まだ記録がありません</div>
   </div>
 
@@ -220,8 +221,32 @@ function showRecords() {
 }
 
 showRecords();
+if (records.length > 0) {
+  const latest = records[records.length - 1];
+  document.getElementById("analysis").innerHTML =
+    "<h3>🤖 AI分析</h3>" + analyzeRecord(latest);
+}
 
 </script>
+function analyzeRecord(record) {
+  let message = "";
+
+  if (record.speed >= 30) {
+    message += "💨 最高速度が高く、スピード能力が良いです。<br>";
+  } else {
+    message += "💨 最高速度をさらに伸ばせる可能性があります。<br>";
+  }
+
+  if (record.stride >= 2) {
+    message += "👣 歩幅を活かした走りができています。<br>";
+  } else {
+    message += "👣 歩幅を安定させることが改善ポイントです。<br>";
+  }
+
+  message += "📈 次の目標は自己ベスト更新です！";
+
+  return message;
+}
 
 </body>
 </html>
