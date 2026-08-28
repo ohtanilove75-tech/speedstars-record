@@ -92,6 +92,20 @@
     </div>
 
   </main>
+<script>
+function saveRecord() {
+  const event = document.getElementById("event").value;
+  const time = document.getElementById("time").value;
 
+  if (time === "") {
+    document.getElementById("result").textContent =
+      "タイムを入力してください！";
+    return;
+  }
+
+  document.getElementById("result").textContent =
+    event + "： " + time + "秒 を保存しました！🔥";
+}
+</script>
 </body>
 </html>
