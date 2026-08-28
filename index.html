@@ -179,6 +179,26 @@ button:hover {
 
   <!-- 履歴 -->
   <div class="card">
+    <div class="card">
+  <h2>📈 タイム推移</h2>
+
+  <label>グラフに表示する種目</label>
+
+  <select id="graphEvent" onchange="drawGraph()">
+    <option>100m</option>
+    <option>40yd</option>
+    <option>60m</option>
+    <option>60H</option>
+    <option>110H</option>
+    <option>150m</option>
+    <option>200m</option>
+    <option>300m</option>
+    <option>400H</option>
+    <option>4×100m</option>
+  </select>
+
+  <canvas id="recordChart" height="250"></canvas>
+</div>
     <h2>📊 記録履歴</h2>
     <div id="records">
       まだ記録がありません。
@@ -491,6 +511,26 @@ if (records.length > 0) {
 }
 
 </script>
+<div class="card">
+  <h2>📈 タイム推移</h2>
 
+  <label>グラフに表示する種目</label>
+
+  <select id="graphEvent" onchange="drawGraph()">
+    <option>100m</option>
+    <option>40yd</option>
+    <option>60m</option>
+    <option>60H</option>
+    <option>110H</option>
+    <option>150m</option>
+    <option>200m</option>
+    <option>300m</option>
+    <option>400H</option>
+    <option>4×100m</option>
+  </select>
+
+  <canvas id="recordChart" height="250"></canvas>
+</div>
 </body>
+
 </html>
