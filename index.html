@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>SPEED STARS RECORD</title>
 
 <style>
@@ -72,6 +73,7 @@ button {
   font-weight: bold;
   background: white;
   color: black;
+  cursor: pointer;
 }
 
 button:hover {
@@ -95,7 +97,7 @@ button:hover {
 }
 
 .best {
-  font-size: 25px;
+  font-size: 24px;
   font-weight: bold;
 }
 
@@ -107,9 +109,18 @@ button:hover {
   margin-top: 8px;
 }
 
-.small {
+canvas {
+  width: 100%;
+  height: 280px;
+  background: #111116;
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+.graph-info {
   color: #aaa;
   font-size: 13px;
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -125,9 +136,11 @@ button:hover {
 
   <!-- 記録入力 -->
   <div class="card">
+
     <h2>🏃 記録を入力</h2>
 
     <label>種目</label>
+
     <select id="event">
       <option>40yd</option>
       <option>60m</option>
@@ -142,70 +155,125 @@ button:hover {
     </select>
 
     <label>タイム（秒）</label>
-    <input id="time" type="number" step="0.01" placeholder="例：12.34">
+
+    <input
+      id="time"
+      type="number"
+      step="0.01"
+      placeholder="例：12.34"
+    >
 
     <label>歩幅（m）</label>
-    <input id="stride" type="number" step="0.01" placeholder="例：2.10">
+
+    <input
+      id="stride"
+      type="number"
+      step="0.01"
+      placeholder="例：2.10"
+    >
 
     <label>最高速度（km/h）</label>
-    <input id="speed" type="number" step="0.1" placeholder="例：32.5">
 
-    <button onclick="saveRecord()">💾 記録を保存</button>
+    <input
+      id="speed"
+      type="number"
+      step="0.1"
+      placeholder="例：32.5"
+    >
+
+    <button onclick="saveRecord()">
+      💾 記録を保存
+    </button>
+
   </div>
+
 
   <!-- AI分析 -->
   <div class="card">
+
     <h2>🤖 AI分析</h2>
+
     <div id="analysis">
       記録を入力すると分析します。
     </div>
+
   </div>
 
-  <!-- 世界記録比較 -->
+
+  <!-- 世界記録 -->
   <div class="card">
+
     <h2>🌎 世界記録との差</h2>
+
     <div id="worldComparison">
       まだ記録がありません。
     </div>
+
   </div>
+
 
   <!-- 自己ベスト -->
   <div class="card">
+
     <h2>🏆 自己ベスト</h2>
+
     <div id="best">
       まだ記録がありません。
     </div>
+
   </div>
 
-  <!-- 履歴 -->
+
+  <!-- グラフ -->
   <div class="card">
-    <div class="card">
-  <h2>📈 タイム推移</h2>
 
-  <label>グラフに表示する種目</label>
+    <h2>📈 成長グラフ</h2>
 
-  <select id="graphEvent" onchange="drawGraph()">
-    <option>100m</option>
-    <option>40yd</option>
-    <option>60m</option>
-    <option>60H</option>
-    <option>110H</option>
-    <option>150m</option>
-    <option>200m</option>
-    <option>300m</option>
-    <option>400H</option>
-    <option>4×100m</option>
-  </select>
+    <label>種目</label>
 
-  <canvas id="recordChart" height="250"></canvas>
-</div>
+    <select id="graphEvent" onchange="drawGraph()">
+      <option>40yd</option>
+      <option>60m</option>
+      <option>60H</option>
+      <option>100m</option>
+      <option>110H</option>
+      <option>150m</option>
+      <option>200m</option>
+      <option>300m</option>
+      <option>400H</option>
+      <option>4×100m</option>
+    </select>
+
+    <label>表示するデータ</label>
+
+    <select id="graphType" onchange="drawGraph()">
+      <option value="time">📈 タイム</option>
+      <option value="stride">👣 歩幅</option>
+      <option value="speed">💨 最高速度</option>
+    </select>
+
+    <canvas id="recordChart"></canvas>
+
+    <div class="graph-info" id="graphInfo">
+      種目とデータを選択してください
+    </div>
+
+  </div>
+
+
+  <!-- 記録履歴 -->
+  <div class="card">
+
     <h2>📊 記録履歴</h2>
+
     <div id="records">
       まだ記録がありません。
     </div>
+
   </div>
 
 </div>
+
 
 <script>
 
@@ -232,7 +300,9 @@ const worldRecords = {
 ========================= */
 
 let records =
-  JSON.parse(localStorage.getItem("speedstarsRecords")) || [];
+  JSON.parse(
+    localStorage.getItem("speedstarsRecords")
+  ) || [];
 
 
 /* =========================
@@ -245,50 +315,92 @@ function saveRecord() {
     document.getElementById("event").value;
 
   const time =
-    parseFloat(document.getElementById("time").value);
+    parseFloat(
+      document.getElementById("time").value
+    );
 
   const stride =
-    parseFloat(document.getElementById("stride").value) || 0;
+    parseFloat(
+      document.getElementById("stride").value
+    ) || 0;
 
   const speed =
-    parseFloat(document.getElementById("speed").value) || 0;
+    parseFloat(
+      document.getElementById("speed").value
+    ) || 0;
+
 
   if (!time || time <= 0) {
+
     alert("タイムを入力してください！");
+
     return;
   }
 
+
   const previousRecords =
-    records.filter(r => r.event === event);
+    records.filter(
+      r => r.event === event
+    );
+
 
   const previous =
     previousRecords.length > 0
-      ? previousRecords[previousRecords.length - 1]
+      ? previousRecords[
+          previousRecords.length - 1
+        ]
       : null;
 
+
   const record = {
+
     event: event,
+
     time: time,
+
     stride: stride,
+
     speed: speed,
-    date: new Date().toLocaleDateString("ja-JP")
+
+    date:
+      new Date().toLocaleDateString(
+        "ja-JP"
+      )
+
   };
 
+
   records.push(record);
+
 
   localStorage.setItem(
     "speedstarsRecords",
     JSON.stringify(records)
   );
 
+
   document.getElementById("time").value = "";
+
   document.getElementById("stride").value = "";
+
   document.getElementById("speed").value = "";
 
+
   showBest();
+
   showRecords();
-  showAnalysis(record, previous);
-  showWorldComparison(record);
+
+  showAnalysis(
+    record,
+    previous
+  );
+
+  showWorldComparison(
+    record
+  );
+
+  drawGraph();
+
 }
 
 
@@ -296,60 +408,120 @@ function saveRecord() {
    AI分析
 ========================= */
 
-function showAnalysis(record, previous) {
+function showAnalysis(
+  record,
+  previous
+) {
 
-  let html = "";
+  let html =
+    "<div class='result'>";
 
-  html += "<div class='result'>";
 
-  html += "<strong>🤖 自動分析</strong>";
+  html +=
+    "<strong>🤖 自動分析</strong>";
 
-  if (record.speed >= 30) {
-    html += "<div class='good'>💨 最高速度は高めです。スピード能力が強みです。</div>";
-  } else if (record.speed > 0) {
-    html += "<div class='warning'>💨 最高速度をさらに伸ばせる余地があります。</div>";
+
+  if (record.speed > 0) {
+
+    if (record.speed >= 30) {
+
+      html +=
+        "<div class='good'>" +
+        "💨 最高速度が高く、スピード能力が強みです。" +
+        "</div>";
+
+    } else {
+
+      html +=
+        "<div class='warning'>" +
+        "💨 最高速度をさらに伸ばせる可能性があります。" +
+        "</div>";
+
+    }
+
   }
 
-  if (record.stride >= 2) {
-    html += "<div class='good'>👣 歩幅をしっかり活かせています。</div>";
-  } else if (record.stride > 0) {
-    html += "<div class='warning'>👣 歩幅を安定させることがポイントです。</div>";
+
+  if (record.stride > 0) {
+
+    if (record.stride >= 2) {
+
+      html +=
+        "<div class='good'>" +
+        "👣 歩幅を活かした走りができています。" +
+        "</div>";
+
+    } else {
+
+      html +=
+        "<div class='warning'>" +
+        "👣 歩幅を安定させることがポイントです。" +
+        "</div>";
+
+    }
+
   }
+
 
   if (previous) {
 
     const difference =
       previous.time - record.time;
 
+
     if (difference > 0) {
 
       html +=
-        "<div class='good'>🔥 前回より " +
+        "<div class='good'>" +
+        "🔥 前回より " +
         difference.toFixed(2) +
-        "秒更新しました！</div>";
+        "秒更新しました！" +
+        "</div>";
 
-    } else if (difference < 0) {
-
-      html +=
-        "<div class='warning'>📈 前回より " +
-        Math.abs(difference).toFixed(2) +
-        "秒遅くなっています。フォームやコンディションを確認してみましょう。</div>";
-
-    } else {
-
-      html +=
-        "<div>➡️ 前回と同じタイムです。</div>";
     }
 
-  } else {
+    else if (difference < 0) {
 
-    html +=
-      "<div>🆕 この種目の最初の記録です！</div>";
+      html +=
+        "<div class='warning'>" +
+        "📈 前回より " +
+        Math.abs(
+          difference
+        ).toFixed(2) +
+        "秒遅くなっています。" +
+        "</div>";
+
+    }
+
+    else {
+
+      html +=
+        "<div>" +
+        "➡️ 前回と同じタイムです。" +
+        "</div>";
+
+    }
+
   }
 
-  html += "</div>";
+  else {
 
-  document.getElementById("analysis").innerHTML = html;
+    html +=
+      "<div>" +
+      "🆕 この種目の最初の記録です！" +
+      "</div>";
+
+  }
+
+
+  html +=
+    "</div>";
+
+
+  document.getElementById(
+    "analysis"
+  ).innerHTML = html;
+
 }
 
 
@@ -357,40 +529,53 @@ function showAnalysis(record, previous) {
    世界記録比較
 ========================= */
 
-function showWorldComparison(record) {
+function showWorldComparison(
+  record
+) {
 
   const world =
-    worldRecords[record.event];
+    worldRecords[
+      record.event
+    ];
 
-  if (!world) {
-    return;
-  }
+
+  if (!world) return;
+
 
   const difference =
     record.time - world;
 
-  let html = "";
 
-  html += "<div class='result'>";
+  let html =
+    "<div class='result'>";
+
 
   html +=
     "🌎 世界記録：<strong>" +
     world.toFixed(2) +
     "秒</strong><br><br>";
 
+
   html +=
     "🏃 あなたの記録：<strong>" +
     record.time.toFixed(2) +
     "秒</strong><br><br>";
+
 
   html +=
     "⏱️ 世界記録との差：<strong>" +
     difference.toFixed(2) +
     "秒</strong>";
 
-  html += "</div>";
 
-  document.getElementById("worldComparison").innerHTML = html;
+  html +=
+    "</div>";
+
+
+  document.getElementById(
+    "worldComparison"
+  ).innerHTML = html;
+
 }
 
 
@@ -401,220 +586,660 @@ function showWorldComparison(record) {
 function showBest() {
 
   const bestArea =
-    document.getElementById("best");
+    document.getElementById(
+      "best"
+    );
+
 
   if (records.length === 0) {
+
     bestArea.innerHTML =
       "まだ記録がありません";
+
     return;
+
   }
+
 
   const bests = {};
 
-  records.forEach(record => {
 
-    if (
-      !bests[record.event] ||
-      record.time < bests[record.event].time
-    ) {
-      bests[record.event] = record;
+  records.forEach(
+    record => {
+
+      if (
+
+        !bests[record.event] ||
+
+        record.time <
+        bests[record.event].time
+
+      ) {
+
+        bests[
+          record.event
+        ] = record;
+
+      }
+
     }
+  );
 
-  });
 
   let html = "";
 
-  Object.values(bests).forEach(record => {
 
-    html += `
-      <div class="record">
-        🥇 ${record.event}
-        <span class="best">
-          ${record.time.toFixed(2)}秒
-        </span>
-      </div>
-    `;
+  Object.values(
+    bests
+  ).forEach(
+    record => {
 
-  });
+      html += `
+
+        <div class="record">
+
+          🥇 ${record.event}
+
+          <span class="best">
+
+            ${record.time.toFixed(2)}秒
+
+          </span>
+
+        </div>
+
+      `;
+
+    }
+  );
+
 
   bestArea.innerHTML = html;
+
 }
 
 
 /* =========================
-   履歴
+   記録履歴
 ========================= */
 
 function showRecords() {
 
   const area =
-    document.getElementById("records");
+    document.getElementById(
+      "records"
+    );
+
 
   if (records.length === 0) {
+
     area.innerHTML =
       "まだ記録がありません";
+
     return;
+
   }
+
 
   let html = "";
 
-  records.slice().reverse().forEach(record => {
 
-    html += `
-      <div class="record">
+  records
+    .slice()
+    .reverse()
+    .forEach(
+      record => {
 
-        <strong>${record.event}</strong><br>
+        html += `
 
-        ⏱️ ${record.time.toFixed(2)}秒<br>
+          <div class="record">
 
-        👣 歩幅：
-        ${record.stride.toFixed(2)}m<br>
+            <strong>
+              ${record.event}
+            </strong>
 
-        💨 最高速度：
-        ${record.speed.toFixed(1)}km/h<br>
+            <br>
 
-        📅 ${record.date}
+            ⏱️
+            ${record.time.toFixed(2)}秒
 
-      </div>
-    `;
+            <br>
 
-  });
+            👣 歩幅：
+            ${record.stride.toFixed(2)}m
+
+            <br>
+
+            💨 最高速度：
+            ${record.speed.toFixed(1)}km/h
+
+            <br>
+
+            📅
+            ${record.date}
+
+          </div>
+
+        `;
+
+      }
+    );
+
 
   area.innerHTML = html;
+
 }
 
 
 /* =========================
-   起動時表示
+   グラフ
 ========================= */
 
-showBest();
-showRecords();
+function drawGraph() {
 
-if (records.length > 0) {
-
-  const latest =
-    records[records.length - 1];
-
-  const sameEvent =
-    records.filter(
-      r => r.event === latest.event
+  const canvas =
+    document.getElementById(
+      "recordChart"
     );
 
-  const previous =
-    sameEvent.length > 1
-      ? sameEvent[sameEvent.length - 2]
-      : null;
 
-  showAnalysis(latest, previous);
-  showWorldComparison(latest);
-}
-function drawGraph() {
-  const event = document.getElementById("graphEvent").value;
-  const canvas = document.getElementById("recordChart");
-  const ctx = canvas.getContext("2d");
+  const ctx =
+    canvas.getContext("2d");
 
-  const data = records.filter(r => r.event === event);
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const event =
+    document.getElementById(
+      "graphEvent"
+    ).value;
+
+
+  const graphType =
+    document.getElementById(
+      "graphType"
+    ).value;
+
+
+  const info =
+    document.getElementById(
+      "graphInfo"
+    );
+
+
+  const data =
+    records.filter(
+      r =>
+        r.event === event
+    );
+
+
+  const width =
+    canvas.clientWidth;
+
+
+  const height = 280;
+
+
+  canvas.width = width;
+
+  canvas.height = height;
+
+
+  ctx.clearRect(
+    0,
+    0,
+    width,
+    height
+  );
+
 
   if (data.length === 0) {
-    ctx.font = "16px Arial";
-    ctx.fillText("まだ記録がありません", 20, 40);
+
+    ctx.fillStyle = "white";
+
+    ctx.font =
+      "16px Arial";
+
+
+    ctx.fillText(
+      "この種目の記録がありません",
+      20,
+      40
+    );
+
+
+    info.innerHTML =
+      "記録を追加するとグラフが表示されます";
+
     return;
+
   }
 
-  const width = canvas.width;
-  const height = canvas.height;
 
-  const padding = 40;
+  /* グラフのデータ設定 */
 
-  const times = data.map(r => r.time);
+  let values;
 
-  const minTime = Math.min(...times);
-  const maxTime = Math.max(...times);
+  let title;
 
-  const range =
-    maxTime - minTime === 0
-      ? 1
-      : maxTime - minTime;
+  let unit;
+
+
+  if (
+    graphType === "time"
+  ) {
+
+    values =
+      data.map(
+        r => r.time
+      );
+
+    title =
+      "📈 タイム推移";
+
+    unit =
+      "秒";
+
+  }
+
+
+  if (
+    graphType === "stride"
+  ) {
+
+    values =
+      data.map(
+        r => r.stride
+      );
+
+    title =
+      "👣 歩幅推移";
+
+    unit =
+      "m";
+
+  }
+
+
+  if (
+    graphType === "speed"
+  ) {
+
+    values =
+      data.map(
+        r => r.speed
+      );
+
+    title =
+      "💨 最高速度推移";
+
+    unit =
+      "km/h";
+
+  }
+
+
+  /* データがない場合 */
+
+  if (
+    values.every(
+      value => value === 0
+    )
+  ) {
+
+    ctx.fillStyle = "white";
+
+    ctx.font =
+      "16px Arial";
+
+
+    ctx.fillText(
+      "このデータがありません",
+      20,
+      40
+    );
+
+
+    info.innerHTML =
+      "記録入力時にこのデータを追加してください";
+
+    return;
+
+  }
+
+
+  const padding = 45;
+
+
+  let min =
+    Math.min(
+      ...values
+    );
+
+
+  let max =
+    Math.max(
+      ...values
+    );
+
+
+  if (min === max) {
+
+    min -= 1;
+
+    max += 1;
+
+  }
+
+
+  /* 背景の軸 */
+
+  ctx.strokeStyle =
+    "#555";
+
+
+  ctx.lineWidth = 1;
+
 
   ctx.beginPath();
 
-  data.forEach((r, i) => {
 
-    const x =
-      padding +
-      (i / Math.max(data.length - 1, 1)) *
-      (width - padding * 2);
+  ctx.moveTo(
+    padding,
+    20
+  );
 
-    const y =
-      height -
-      padding -
-      ((r.time - minTime) / range) *
-      (height - padding * 2);
 
-    if (i === 0) {
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
-    }
+  ctx.lineTo(
+    padding,
+    height - padding
+  );
 
-  });
+
+  ctx.lineTo(
+    width - 20,
+    height - padding
+  );
+
 
   ctx.stroke();
 
-  data.forEach((r, i) => {
 
-    const x =
-      padding +
-      (i / Math.max(data.length - 1, 1)) *
-      (width - padding * 2);
+  /* タイムの場合は
+     小さい数字が上になるようにする */
 
-    const y =
+  function getY(value) {
+
+    if (
+      graphType === "time"
+    ) {
+
+      return (
+        20 +
+
+        (
+          (value - min) /
+          (max - min)
+        )
+
+        *
+
+        (
+          height -
+          padding -
+          30
+        )
+
+      );
+
+    }
+
+
+    return (
+
       height -
       padding -
-      ((r.time - minTime) / range) *
-      (height - padding * 2);
 
-    ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI * 2);
-    ctx.fill();
+      (
+        (value - min) /
+        (max - min)
+      )
 
-    ctx.font = "12px Arial";
-    ctx.fillText(
-      r.time.toFixed(2),
-      x - 12,
-      y - 10
+      *
+
+      (
+        height -
+        padding -
+        30
+      )
+
     );
 
-  });
+  }
 
-  ctx.font = "12px Arial";
-  ctx.fillText("← 過去", 10, height - 10);
-  ctx.fillText("最新 →", width - 55, height - 10);
-}drawGraph();
+
+  /* データ線 */
+
+  ctx.strokeStyle =
+    "#ffffff";
+
+
+  ctx.lineWidth = 3;
+
+
+  ctx.beginPath();
+
+
+  data.forEach(
+    (
+      record,
+      i
+    ) => {
+
+      const value =
+        values[i];
+
+
+      const x =
+
+        data.length === 1
+
+          ? width / 2
+
+          : padding +
+
+            (
+              i /
+              (
+                data.length - 1
+              )
+            )
+
+            *
+
+            (
+              width -
+              padding -
+              25
+            );
+
+
+      const y =
+        getY(value);
+
+
+      if (i === 0) {
+
+        ctx.moveTo(
+          x,
+          y
+        );
+
+      }
+
+      else {
+
+        ctx.lineTo(
+          x,
+          y
+        );
+
+      }
+
+    }
+  );
+
+
+  ctx.stroke();
+
+
+  /* ポイント */
+
+  data.forEach(
+    (
+      record,
+      i
+    ) => {
+
+      const value =
+        values[i];
+
+
+      const x =
+
+        data.length === 1
+
+          ? width / 2
+
+          : padding +
+
+            (
+              i /
+              (
+                data.length - 1
+              )
+            )
+
+            *
+
+            (
+              width -
+              padding -
+              25
+            );
+
+
+      const y =
+        getY(value);
+
+
+      ctx.fillStyle =
+        "white";
+
+
+      ctx.beginPath();
+
+
+      ctx.arc(
+        x,
+        y,
+        5,
+        0,
+        Math.PI * 2
+      );
+
+
+      ctx.fill();
+
+
+      ctx.font =
+        "12px Arial";
+
+
+      ctx.fillText(
+
+        value.toFixed(
+          graphType === "speed"
+            ? 1
+            : 2
+        ) + unit,
+
+        x - 15,
+        y - 10
+
+      );
+
+    }
+  );
+
+
+  /* 下の文字 */
+
+  ctx.fillStyle =
+    "#aaa";
+
+
+  ctx.font =
+    "12px Arial";
+
+
+  ctx.fillText(
+    "過去",
+    padding,
+    height - 10
+  );
+
+
+  ctx.fillText(
+    "最新",
+    width - 45,
+    height - 10
+  );
+
+
+  /* グラフ説明 */
+
+  info.innerHTML =
+
+    "<strong>" +
+    title +
+    "</strong><br>" +
+
+    "最高値： " +
+
+    max.toFixed(
+      graphType === "speed"
+        ? 1
+        : 2
+    ) +
+
+    unit +
+
+    " ／ 最低値： " +
+
+    min.toFixed(
+      graphType === "speed"
+        ? 1
+        : 2
+    ) +
+
+    unit;
+
+}
+
+
+/* =========================
+   起動
+========================= */
+
+showBest();
+
+showRecords();
+
+drawGraph();
+
 </script>
-<div class="card">
-  <h2>📈 タイム推移</h2>
 
-  <label>グラフに表示する種目</label>
-
-  <select id="graphEvent" onchange="drawGraph()">
-    <option>100m</option>
-    <option>40yd</option>
-    <option>60m</option>
-    <option>60H</option>
-    <option>110H</option>
-    <option>150m</option>
-    <option>200m</option>
-    <option>300m</option>
-    <option>400H</option>
-    <option>4×100m</option>
-  </select>
-
-  <canvas id="recordChart" height="250"></canvas>
-</div>
 </body>
-
 </html>
+     
+  
